@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel-LEWS | Edge Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="icon-pulse"></div>
+                <h2>SENTINEL</h2>
+            </div>
+
+            <nav>
+                <a href="#" class="active">Overview</a>
+                <a href="#">Sensors</a>
+                <a href="#">System Health</a>
+                <a href="#">Logs</a>
+            </nav>
+
+            <div class="status-panel">
+                <div class="status-item">
+                    <span class="label">CPU</span>
+                    <div class="bar">
+                        <div class="fill" style="width: 45%"></div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <span class="label">RAM</span>
+                    <div class="bar">
+                        <div class="fill" style="width: 60%"></div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <span class="label">LATENCY</span>
+                    <span class="value">12.4s</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div class="breadcrumbs">REGION: HIMACHAL_DIST_01 // LIVE</div>
+                <div class="clock" id="clock">00:00:00 UTC</div>
+            </header>
+
+            <div class="grid-layout">
+                <div class="card map-card">
+                    <h3>Risk Heatmap (Real-time)</h3>
+                    <div class="map-container" id="map-container">
+                        <!-- Canvas for heatmap -->
+                        <canvas id="riskMap"></canvas>
+                        <div class="overlay-info">Max Risk: <span class="danger-text">0.86</span></div>
+                    </div>
+                </div>
+
+                <div class="card alerts-card">
+                    <h3>Pending Alerts</h3>
+                    <div class="alert-list" id="alert-list">
+                        <!-- Items injected by JS -->
+                        <div class="alert-item high">
+                            <span class="time">12:30</span>
+                            <span class="msg">SECTOR-12: High Landslide Risk. Evacuate Zone A.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card sensor-card">
+                    <h3>Sensor Fusion</h3>
+                    <div class="sensor-stats">
+                        <div class="stat">
+                            <span class="val">142</span>
+                            <span class="lbl">Active</span>
+                        </div>
+                        <div class="stat warn">
+                            <span class="val">12</span>
+                            <span class="lbl">Drift</span>
+                        </div>
+                        <div class="stat err">
+                            <span class="val">5</span>
+                            <span class="lbl">Offline</span>
+                        </div>
+                    </div>
+                    <div class="chart-box">
+                        <!-- Placeholder for sparkline -->
+                        <canvas id="sensorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>

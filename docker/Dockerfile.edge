@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY src/ src/
+COPY data/static data/static
+
+# Set python path
+ENV PYTHONPATH=/app
+
+# Expose inference port
+EXPOSE 8000
+
+# Entrypoint
+CMD ["python", "src/inference/server.py"]

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENTINEL-LEWS | District Command</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-safe: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warn: #f59e0b;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            background: rgba(15, 23, 42, 0.9);
+            border-bottom: 1px solid #334155;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 1px; color: var(--text-primary); }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        .online { background: rgba(16, 185, 129, 0.2); color: var(--accent-safe); border: 1px solid var(--accent-safe); }
+        .offline { background: rgba(239, 68, 68, 0.2); color: var(--accent-danger); border: 1px solid var(--accent-danger); }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .card-header { text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 1rem; }
+        
+        .big-number { font-size: 4rem; font-weight: 700; line-height: 1; }
+        .sub-text { color: var(--text-secondary); margin-top: 0.5rem; }
+
+        #risk-display { color: var(--accent-safe); }
+        
+        .alert-box {
+            grid-column: 1 / -1;
+            background: #450a0a;
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            display: none; /* Hidden by default */
+            font-size: 1.2rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .log-terminal {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #0f172a;
+            background: #cbd5e1;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:12px; height:12px; background:var(--accent-safe); border-radius:50%; box-shadow:0 0 10px var(--accent-safe);"></div>
+            <h1>POOL-2026: SENTINEL-LEWS</h1>
+        </div>
+        <div id="connection-status" class="status-badge online">SYSTEM ACTIVE</div>
+    </header>
+
+    <main>
+        <!-- Alert Banner -->
+        <div id="alert-banner" class="card alert-box" style="justify-content: center; align-items: center; text-align: center;">
+            ⚠️ CRITICAL ALERT: LANDSLIDE RISK IMMINENT ⚠️
+            <div id="alert-msg" style="font-size:1rem; margin-top:0.5rem; font-weight:normal;"></div>
+        </div>
+
+        <!-- Main Risk Metric -->
+        <div class="card">
+            <div class="card-header">Peak District Risk (0.0 - 1.0)</div>
+            <div class="big-number" id="risk-score">0.02</div>
+            <div class="sub-text">Based on Real-Time Sensor Fusion</div>
+            <div style="margin-top:auto;">
+                <div style="height:4px; width:100%; background:#334155; border-radius:2px; overflow:hidden;">
+                    <div id="risk-bar" style="height:100%; width:2%; background:var(--accent-safe); transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sensor Status -->
+        <div class="card">
+            <div class="card-header">Sensor Network State</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                <span>Active Nodes</span>
+                <span id="active-sensors" style="color:var(--text-primary); font-weight:bold;">--</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>Reliability Score</span>
+                <span id="reliability" style="color:var(--text-primary); font-weight:bold;">--%</span>
+            </div>
+            <div style="margin-top:1rem; font-size:0.8rem; color:var(--text-secondary);">
+                Last Update: <span id="last-update">Waiting...</span>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header">System Event Log</div>
+            <div id="sys-log" class="log-terminal">
+                [SYSTEM] Initializing Dashboard Link...<br>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function updateDashboard() {
+            fetch('/api/status')
+                .then(res => res.json())
+                .then(data => {
+                    // Update Risk
+                    const risk = data.max_risk || 0.0;
+                    const riskEl = document.getElementById('risk-score');
+                    const riskBar = document.getElementById('risk-bar');
+                    
+                    riskEl.innerText = risk.toFixed(3);
+                    riskBar.style.width = (risk * 100) + '%';
+                    
+                    if(risk > 0.75) {
+                        riskEl.style.color = 'var(--accent-danger)';
+                        riskBar.style.background = 'var(--accent-danger)';
+                    } else if (risk > 0.4) {
+                        riskEl.style.color = 'var(--accent-warn)';
+                        riskBar.style.background = 'var(--accent-warn)';
+                    } else {
+                        riskEl.style.color = 'var(--accent-safe)';
+                        riskBar.style.background = 'var(--accent-safe)';
+                    }
+
+                    // Sensors
+                    document.getElementById('active-sensors').innerText = data.active_sensors || 0;
+                    document.getElementById('reliability').innerText = (data.sensor_trust_avg * 100).toFixed(1) + "%";
+                    document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+
+                    // Alert
+                    const alertBanner = document.getElementById('alert-banner');
+                    if(data.alert_active) {
+                        alertBanner.style.display = 'flex';
+                        document.getElementById('alert-msg').innerText = data.last_alert_msg;
+                    } else {
+                        alertBanner.style.display = 'none';
+                    }
+                    
+                    // Log
+                    const logEl = document.getElementById('sys-log');
+                    logEl.innerHTML = `[${new Date().toLocaleTimeString()}] Sync: OK | Latency: ${data.compute_latency_ms}ms<br>` + logEl.innerHTML.slice(0, 500);
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('connection-status').className = 'status-badge offline';
+                    document.getElementById('connection-status').innerText = 'OFFLINE';
+                });
+        }
+
+        setInterval(updateDashboard, 2000); // 2 Second Polling
+    </script>
+</body>
+</html>
